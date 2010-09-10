@@ -1,0 +1,11 @@
+Put and get objects in a cache.
+
+Runs a thread which prunes expired entries periodically to prevent memory
+bloat.
+
+Objects are added to the cache with a key and a value. Objects put into the
+cache can be retrieved until they expire.
+
+Copyright 2010, Justin Force
+Dual licensed under the MIT or GPL Version 2 licenses.
+
