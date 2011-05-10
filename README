@@ -7,5 +7,5 @@ Objects are added to the cache with a key and a value. Objects put into the
 cache can be retrieved until they expire.
 
 Copyright 2010, Justin Force
-Dual licensed under the MIT or GPL Version 2 licenses.
+Licensed under the BSD license
 

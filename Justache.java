@@ -20,7 +20,7 @@ import java.util.Hashtable;
  * @param <V>
  *            The Java class of the values
  */
-public class Cache<K, V> {
+public class Justache<K, V> {
 
 	/**
 	 * The "time to live" of the cached object. After ttl milliseconds have
@@ -31,7 +31,7 @@ public class Cache<K, V> {
 	/**
 	 * The Java Hashtable which we will use to store our objects internally.
 	 */
-	private Hashtable<K, CacheValue<V>> table;
+	private Hashtable<K, JustacheValue<V>> table;
 
 	/**
 	 * The thread which prunes expired entries
@@ -46,14 +46,14 @@ public class Cache<K, V> {
 	 * @param ttl
 	 *            "time to live" in milliseconds
 	 */
-	public Cache(final long ttl) {
+	public Justache(final long ttl) {
 
 		this.ttl = ttl;
 
 		/*
 		 * Set up new Hashtable to hold all of our cache key/value pairs
 		 */
-		table = new Hashtable<K, CacheValue<V>>();
+		table = new Hashtable<K, JustacheValue<V>>();
 
 		/*
 		 * Set up the thread and just run prune then sleep ttl milliseconds
@@ -85,10 +85,10 @@ public class Cache<K, V> {
 	public void put(K key, V value) {
 
 		/*
-		 * Wrap value in a new CacheValue, setting the ttl to now + ttl
+		 * Wrap value in a new JustacheValue, setting the ttl to now + ttl
 		 * milliseconds, then add it to the hashtable.
 		 */
-		table.put(key, new CacheValue<V>(new GregorianCalendar()
+		table.put(key, new JustacheValue<V>(new GregorianCalendar()
 				.getTimeInMillis()
 				+ ttl, value));
 	}
@@ -99,14 +99,14 @@ public class Cache<K, V> {
 	 * @param key
 	 *            the key corresponding to value
 	 * @return the value
-	 * @throws CacheKeyNotFoundException
+	 * @throws JustacheKeyNotFoundException
 	 *             if the value corresponding to key is not present, which can
 	 *             happen if it has expired or never existed.
 	 */
-	public V get(K key) throws CacheKeyNotFoundException {
-		CacheValue<V> o = table.get(key);
+	public V get(K key) throws JustacheKeyNotFoundException {
+		JustacheValue<V> o = table.get(key);
 		if (o == null || o.expired()) {
-			throw new CacheKeyNotFoundException();
+			throw new JustacheKeyNotFoundException();
 		} else {
 			return o.get();
 		}
@@ -154,7 +154,7 @@ public class Cache<K, V> {
 	 * @param <C>
 	 *            the Java class of the value to be stored
 	 */
-	private class CacheValue<C> {
+	private class JustacheValue<C> {
 
 		/**
 		 * The value stored
@@ -167,14 +167,14 @@ public class Cache<K, V> {
 		private long expiry;
 
 		/**
-		 * Construct new CacheValue with value and expiration date
+		 * Construct new JustacheValue with value and expiration date
 		 * 
 		 * @param expiry
 		 *            the expiration date
 		 * @param value
 		 *            the value
 		 */
-		private CacheValue(long expiry, C value) {
+		private JustacheValue(long expiry, C value) {
 			this.expiry = expiry;
 			this.value = value;
 		}

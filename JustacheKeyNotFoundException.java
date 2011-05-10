@@ -6,7 +6,7 @@ package com.sidewaysmilk;
  * @author Justin Force - justin.force@gmail.com
  * 
  */
-public class CacheKeyNotFoundException extends Exception {
+public class JustacheKeyNotFoundException extends Exception {
 
 	private static final long serialVersionUID = -1076544224523532707L;
 }
