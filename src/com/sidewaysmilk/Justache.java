@@ -3,6 +3,7 @@ package com.sidewaysmilk;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Put and get objects in a cache.
@@ -39,6 +40,18 @@ public class Justache<K, V> {
 	private Thread thread;
 
 	/**
+	 * The maximum number of items allowed in the cache. Default is 0 for
+	 * unlimited.
+	 */
+	private long maxSize;
+
+	/**
+	 * A chronological list of all of the keys for use with automatically
+	 * deleting the oldest elements when maxSize is exceeded
+	 */
+	private Vector<K> keys;
+
+	/**
 	 * Constructs a new, empty cache with "time to live" set to ttl
 	 * milliseconds. Objects put into the cache will be expired after ttl has
 	 * elapsed.
@@ -49,6 +62,8 @@ public class Justache<K, V> {
 	public Justache(final long ttl) {
 
 		this.ttl = ttl;
+
+		this.maxSize = 0;
 
 		/*
 		 * Set up new Hashtable to hold all of our cache key/value pairs
@@ -74,6 +89,12 @@ public class Justache<K, V> {
 		thread.start();
 	}
 
+	public Justache(final long ttl, final long maxSize) {
+		this(ttl);
+		this.maxSize = maxSize;
+		this.keys = new Vector<K>();
+	}
+
 	/**
 	 * Put value into cache with key as an index.
 	 * 
@@ -88,9 +109,26 @@ public class Justache<K, V> {
 		 * Wrap value in a new JustacheValue, setting the ttl to now + ttl
 		 * milliseconds, then add it to the hashtable.
 		 */
-		table.put(key, new JustacheValue<V>(new GregorianCalendar()
-				.getTimeInMillis()
-				+ ttl, value));
+		JustacheValue<V> v = new JustacheValue<V>(
+				new GregorianCalendar().getTimeInMillis() + ttl, value);
+		table.put(key, v);
+
+		/*
+		 * Handle the maxSize maintenance if it's defined
+		 */
+		if (maxSize > 0) {
+
+			keys.add(key);
+
+			/*
+			 * If the new length is over the max, remove the oldest item and set
+			 * the next-to-oldest item as the oldest item.
+			 */
+			if (table.size() > maxSize) {
+				remove(keys.firstElement());
+				keys.remove(0);
+			}
+		}
 	}
 
 	/**
@@ -196,5 +234,23 @@ public class Justache<K, V> {
 		private C get() {
 			return value;
 		}
+	}
+
+	public static void main(String[] args) {
+		Justache<String, String> j = new Justache<String, String>(5000, 5);
+		j.put("a", "a");
+		j.put("b", "b");
+		j.put("c", "c");
+		j.put("d", "d");
+		j.put("e", "e");
+		j.put("f", "f");
+		j.put("g", "g");
+		j.put("h", "h");
+		j.put("i", "i");
+		j.put("j", "j");
+		j.put("k", "k");
+		j.put("l", "l");
+		j.put("m", "m");
+		System.out.println(j.toString());
 	}
 }
