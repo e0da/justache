@@ -235,22 +235,4 @@ public class Justache<K, V> {
 			return value;
 		}
 	}
-
-	public static void main(String[] args) {
-		Justache<String, String> j = new Justache<String, String>(5000, 5);
-		j.put("a", "a");
-		j.put("b", "b");
-		j.put("c", "c");
-		j.put("d", "d");
-		j.put("e", "e");
-		j.put("f", "f");
-		j.put("g", "g");
-		j.put("h", "h");
-		j.put("i", "i");
-		j.put("j", "j");
-		j.put("k", "k");
-		j.put("l", "l");
-		j.put("m", "m");
-		System.out.println(j.toString());
-	}
 }
