@@ -1,4 +1,4 @@
-package com.sidewaysmilk;
+package com.sidewaysmilk.justache;
 
 /**
  * Thrown when an a requested object is not found in a Cache

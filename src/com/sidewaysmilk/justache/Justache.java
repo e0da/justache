@@ -1,4 +1,4 @@
-package com.sidewaysmilk;
+package com.sidewaysmilk.justache;
 
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -52,6 +52,11 @@ public class Justache<K, V> {
 	private Vector<K> keys;
 
 	/**
+	 * Is the thread alive (should it be running)?
+	 */
+	private boolean alive;
+
+	/**
 	 * Constructs a new, empty cache with "time to live" set to ttl
 	 * milliseconds. Objects put into the cache will be expired after ttl has
 	 * elapsed.
@@ -63,7 +68,7 @@ public class Justache<K, V> {
 
 		this.ttl = ttl;
 
-		this.maxSize = 0;
+		maxSize = 0;
 
 		/*
 		 * Set up new Hashtable to hold all of our cache key/value pairs
@@ -75,18 +80,41 @@ public class Justache<K, V> {
 		 * forever.
 		 */
 		thread = new Thread(new Runnable() {
+
 			public void run() {
+
+				alive = true;
+
 				while (true) {
+
+					/* If we've been instructed to die, we do so with dignity. */
+					if (!alive) {
+						return;
+					}
+
 					prune();
+
 					try {
 						Thread.sleep(ttl);
 					} catch (InterruptedException e) {
-						// We really don't mind being interrupted. :)
+
+						/* Kill signals arrive on interrupts. */
+						if (!alive) {
+							return;
+						}
 					}
 				}
 			}
 		});
 		thread.start();
+	}
+
+	/**
+	 * Tell the cache to die.
+	 */
+	public void die() {
+		alive = false;
+		thread.interrupt();
 	}
 
 	public Justache(final long ttl, final long maxSize) {
@@ -124,9 +152,17 @@ public class Justache<K, V> {
 			 * If the new length is over the max, remove the oldest item and set
 			 * the next-to-oldest item as the oldest item.
 			 */
-			if (table.size() > maxSize) {
-				remove(keys.firstElement());
-				keys.remove(0);
+			while (table.size() > maxSize) {
+				K firstKey = keys.firstElement();
+				try {
+					remove(firstKey);
+				} catch (NullPointerException e) {
+					// That's OK. It can happen sometimes if we're hammering the
+					// cache; another action may have removed it between the
+					// time we got a reference to it and deleted it. Threads:
+					// gotta love 'em!
+				}
+				keys.remove(firstKey);
 			}
 		}
 	}
@@ -180,6 +216,12 @@ public class Justache<K, V> {
 			K key = keys.nextElement();
 			if (table.get(key).expired()) {
 				remove(key);
+				try {
+					this.keys.remove(key);
+				} catch (NullPointerException e) {
+					// That's OK. There probably isn't a keys index (no max
+					// size)
+				}
 			}
 		}
 	}
